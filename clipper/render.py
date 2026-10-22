@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+import shutil
+import tempfile
 from pathlib import Path
 
 from . import media
@@ -66,10 +68,20 @@ def render_clip(src: Path, info: media.Probe, plan: ClipPlan, fmt: str, words: l
            "-filter_complex", f"{vf};{af}", "-map", "[v]", "-map", "[a]",
            "-c:v", "libx264", "-preset", settings.x264_preset, "-crf", str(settings.video_crf),
            "-maxrate", "8M", "-bufsize", "16M", "-r", "30",
-           "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", "-shortest", str(out)]
-    try:
-        media.run(cmd, timeout=max(600, dur * 30))
-    except Exception as e:  # report the failure instead of dropping the format silently
-        log.error("render %s %s failed: %s", plan.id, fmt, e)
-        return RenderResult(plan.id, fmt, None, False, str(e)[-400:], layout)
+           "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", "-shortest"]
+    # Encode on local disk, then move into the job folder: faststart rewrites the file, which is slow or
+    # unsupported on a mounted storage bucket (Cloud Run).
+    with tempfile.TemporaryDirectory(prefix="clip-") as tmp:
+        local = Path(tmp) / out.name
+        try:
+            media.run(cmd + [str(local)], timeout=max(600, dur * 30))
+            shutil.move(str(local), out)
+        except Exception as e:
+            return _failed(plan, fmt, layout, e)
     return RenderResult(plan.id, fmt, str(out), True, "", layout)
+
+
+def _failed(plan: ClipPlan, fmt: str, layout: str, e: Exception) -> RenderResult:
+    """Report the failure instead of dropping the format silently."""
+    log.error("render %s %s failed: %s", plan.id, fmt, e)
+    return RenderResult(plan.id, fmt, None, False, str(e)[-400:], layout)

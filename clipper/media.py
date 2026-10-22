@@ -146,8 +146,11 @@ def _download_ytdlp(url: str, dest_dir: Path, *, cookies: str, max_minutes: int)
     import yt_dlp
 
     base_opts = {"quiet": True, "no_warnings": True, "noplaylist": True}
-    if cookies:
-        base_opts["cookiefile"] = cookies
+    if cookies and Path(cookies).exists():
+        # yt-dlp writes cookies back on exit; use a copy so a read-only secret mount still works.
+        local = dest_dir / "cookies.txt"
+        shutil.copy(cookies, local)
+        base_opts["cookiefile"] = str(local)
     with yt_dlp.YoutubeDL(base_opts) as ydl:
         info = ydl.extract_info(url, download=False)
     duration = info.get("duration") or 0

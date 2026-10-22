@@ -70,3 +70,17 @@ def test_hire_without_video_asks_for_one(market, tmp_path):
     assert aid not in market.submissions
     msgs = [m["body"] for m in market.messages[aid] if m.get("senderAgentId")]
     assert msgs and "couldn't find a video" in msgs[0]
+
+
+def test_overlapping_runs_do_not_double_work(market, tmp_path):
+    import time
+
+    s = settings(tmp_path)
+    s.market_base_url, s.market_token = market.base, TOKEN
+    first = Worker(s, MarketClient(market.base, TOKEN))
+    second = Worker(s, MarketClient(market.base, TOKEN))  # e.g. the next Cloud Run Job execution
+    aid = market.hire("Clips", "3 clips please https://example.com/v.mp4")
+    first.state.put(aid, busy_until=time.time() + 3600)  # first run has claimed it and is still working
+    assert second.poll_once(wait=True) == []
+    first.state.put(aid, busy_until=time.time() - 1)  # lease ran out (crashed run)
+    assert second.decide(market.assignments[aid]) == "new"

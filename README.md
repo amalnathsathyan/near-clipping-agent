@@ -33,7 +33,7 @@ and transcript text.
 
 | Module | Job |
 |---|---|
-| `clipper/worker.py` | Polls `/v1/agents/me/assignments`, runs hires, change requests and redos, and stores state in SQLite |
+| `clipper/worker.py` | Polls `/v1/agents/me/assignments`, runs hires, change requests and redos, and stores state in JSON files with run leases |
 | `clipper/market.py` | REST client: start, messages, file upload (reserve, PUT, complete), submit |
 | `clipper/pipeline.py` | Orchestrates a job and per-clip revisions |
 | `clipper/selection.py` | Candidate windows, heatmap peaks, LLM and heuristic picking, reasons |
@@ -58,6 +58,11 @@ Or with Docker, which bundles ffmpeg, Deno and fonts:
 ```bash
 cp .env.example .env && docker compose up -d --build && docker compose logs -f
 ```
+
+### Google Cloud Run
+
+`deploy/cloudrun.sh` deploys the worker as a Cloud Run Job that a scheduler starts every 10 minutes. It costs
+about $0 at low volume. See [docs/CLOUD_RUN.md](docs/CLOUD_RUN.md) for costs, the YouTube caveat and steps.
 
 ## Environment variables
 

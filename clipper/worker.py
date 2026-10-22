@@ -4,16 +4,18 @@ Lifecycle per assignment (docs.market.near.ai, Self-hosted agents):
   fresh hire (startedAt null)               -> start, confirm in thread, clip, upload, submit
   in_progress with submittedAt set          -> change request: re-make only the named clips, resubmit
   submittedAt null but deliverableUrl set   -> dispute redo: run the original brief again
-State lives in SQLite so a restart never double-submits or loses a job.
+State lives in small JSON files (local disk or a mounted bucket), so a restart never double-submits or
+loses a job, and two overlapping runs (Cloud Run Job executions) never work on the same assignment.
 """
 
 from __future__ import annotations
 
 import hashlib
 import logging
+import json
+import os
 import shutil
 import signal
-import sqlite3
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -27,46 +29,36 @@ from .media import AUDIO_EXTS, VIDEO_EXTS
 
 log = logging.getLogger(__name__)
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS assignments (
-  id TEXT PRIMARY KEY,
-  phase TEXT NOT NULL,            -- running | delivered | waiting_input | failed
-  job_dir TEXT NOT NULL,
-  confirmed INTEGER DEFAULT 0,
-  last_msg_key TEXT DEFAULT '',
-  version INTEGER DEFAULT 0,
-  error TEXT DEFAULT '',
-  updated_at REAL
-);
-"""
+LEASE_SECONDS = 2 * 3600  # a run that hasn't finished within this is treated as crashed
 
 
 class State:
-    def __init__(self, path: Path):
+    """One small JSON file per assignment. Plain files work on a local disk and on a mounted storage bucket
+    (Cloud Run), where SQLite locking is unreliable."""
+
+    def __init__(self, root: Path):
+        self.root = root
+        self.root.mkdir(parents=True, exist_ok=True)
         self.lock = threading.Lock()
-        self.db = sqlite3.connect(str(path), check_same_thread=False)
-        self.db.row_factory = sqlite3.Row
-        self.db.executescript(SCHEMA)
+
+    def _path(self, aid: str) -> Path:
+        return self.root / f"{aid}.json"
 
     def get(self, aid: str) -> dict | None:
-        with self.lock:
-            r = self.db.execute("SELECT * FROM assignments WHERE id=?", (aid,)).fetchone()
-        return dict(r) if r else None
+        try:
+            return json.loads(self._path(aid).read_text())
+        except (FileNotFoundError, json.JSONDecodeError):
+            return None
 
     def put(self, aid: str, **fields) -> None:
         with self.lock:
-            cur = self.db.execute("SELECT id FROM assignments WHERE id=?", (aid,)).fetchone()
-            fields["updated_at"] = time.time()
-            if cur:
-                sets = ", ".join(f"{k}=?" for k in fields)
-                self.db.execute(f"UPDATE assignments SET {sets} WHERE id=?", (*fields.values(), aid))
-            else:
-                fields.setdefault("phase", "running")
-                fields.setdefault("job_dir", "")
-                cols = ", ".join(["id", *fields])
-                qs = ", ".join("?" * (len(fields) + 1))
-                self.db.execute(f"INSERT INTO assignments ({cols}) VALUES ({qs})", (aid, *fields.values()))
-            self.db.commit()
+            rec = self.get(aid) or {"id": aid, "phase": "running", "job_dir": "", "confirmed": 0,
+                                    "last_msg_key": "", "version": 0, "error": "", "busy_until": 0}
+            rec.update(fields)
+            rec["updated_at"] = time.time()
+            tmp = self._path(aid).with_suffix(".tmp")
+            tmp.write_text(json.dumps(rec))
+            os.replace(tmp, self._path(aid))
 
 
 def msg_key(m: dict | None) -> str:
@@ -84,7 +76,7 @@ class Worker:
     def __init__(self, settings: Settings, client: MarketClient | None = None):
         self.settings = settings
         self.client = client or MarketClient(settings.market_base_url, settings.market_token)
-        self.state = State(settings.db_path)
+        self.state = State(settings.work_dir / "state")
         self.pool = ThreadPoolExecutor(max_workers=max(1, settings.concurrency))
         self.in_flight: set[str] = set()
         self.lock = threading.Lock()
@@ -123,6 +115,8 @@ class Worker:
                 continue
             with self.lock:
                 self.in_flight.add(aid)
+            # Claim it before work starts so an overlapping run (another Job execution) skips it.
+            self.state.put(aid, busy_until=time.time() + LEASE_SECONDS)
             futures.append(self.pool.submit(self._run, action, row))
         if wait:
             for f in futures:
@@ -134,6 +128,8 @@ class Worker:
         aid = a["assignmentId"]
         lm = row.get("latestMessage")
         rec = self.state.get(aid)
+        if rec and rec.get("busy_until", 0) > time.time():
+            return None  # another run (or an earlier execution) is working on it
         if a.get("submittedAt"):
             if is_own(lm) or not lm:
                 return None
@@ -141,11 +137,11 @@ class Worker:
                 return None
             return "revise"
         if a.get("deliverableUrl"):
-            return "redo" if not rec or rec["phase"] != "redo_running" else None
+            return "redo"  # dispute ruling: do the original brief again (the lease above stops repeats)
         if rec is None or a.get("startedAt") is None:
             return "new"
         if rec["phase"] == "running":
-            return "new"  # crashed mid-job: run it again
+            return "new"  # crashed mid-job (its lease ran out): run it again
         if rec["phase"] in ("waiting_input", "failed") and lm and not is_own(lm) and rec["last_msg_key"] != msg_key(lm):
             return "new"
         return None
@@ -162,10 +158,11 @@ class Worker:
             self.state.put(aid, phase="failed", error=str(e)[:500], last_msg_key=msg_key(row.get("latestMessage")))
             try:
                 self.client.send_message(aid, "Sorry, something went wrong on my side while making your clips. "
-                                              "I've logged it and will retry; you can also reply here to nudge me.")
+                                              "I've logged the error. Reply here (even just \"retry\") and I'll try again.")
             except Exception:
                 pass
         finally:
+            self.state.put(aid, busy_until=0)
             with self.lock:
                 self.in_flight.discard(aid)
 

@@ -61,10 +61,6 @@ class Settings:
     keep_days: int = field(default_factory=lambda: _int("KEEP_DAYS", 14))
     target_lufs: float = field(default_factory=lambda: _float("TARGET_LUFS", -14.0))
 
-    @property
-    def db_path(self) -> Path:
-        return self.work_dir / "state.sqlite3"
-
 
 def load() -> Settings:
     s = Settings()

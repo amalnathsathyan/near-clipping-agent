@@ -84,8 +84,10 @@ def cmd_worker(args) -> int:
     from .worker import Worker
 
     s = config.load()
-    if args.once:
-        Worker(s).poll_once(wait=True)
+    if args.once:  # one poll, finish every job it found, then exit (cron / Cloud Run Job mode)
+        w = Worker(s)
+        w.poll_once(wait=True)
+        w.cleanup_old_jobs()
         return 0
     Worker(s).run_forever()
     return 0
