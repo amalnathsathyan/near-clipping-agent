@@ -1,0 +1,9 @@
+services:
+  clipper:
+    build: .
+    env_file: .env
+    environment:
+      WORK_DIR: /data
+    volumes:
+      - ./work:/data
+    restart: unless-stopped
