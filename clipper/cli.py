@@ -120,16 +120,23 @@ def cmd_probe(args) -> int:
         line("yt-dlp", True, yt_dlp.version.__version__)
     except ImportError:
         line("yt-dlp", False, "pip install yt-dlp")
+    def get(url: str, **kw):
+        try:
+            r = requests.get(url, timeout=20, **kw)
+            return r.ok, f"HTTP {r.status_code}"
+        except requests.RequestException as e:
+            return False, f"network error: {str(e)[:160]}"
+
     if s.groq_api_key:
-        r = requests.get("https://api.groq.com/openai/v1/models",
-                         headers={"Authorization": f"Bearer {s.groq_api_key}"}, timeout=20)
-        line("GROQ_API_KEY", r.ok, f"HTTP {r.status_code}")
+        good, detail = get("https://api.groq.com/openai/v1/models",
+                           headers={"Authorization": f"Bearer {s.groq_api_key}"})
+        line("GROQ_API_KEY", good, detail)
     else:
         line("GROQ_API_KEY", False, "not set (needed for transcription unless faster-whisper is installed)")
     if s.gemini_api_key:
-        r = requests.get(f"https://generativelanguage.googleapis.com/v1beta/models/{s.gemini_model}",
-                         headers={"x-goog-api-key": s.gemini_api_key}, timeout=20)
-        line("GEMINI_API_KEY", r.ok, f"HTTP {r.status_code} for {s.gemini_model}")
+        good, detail = get(f"https://generativelanguage.googleapis.com/v1beta/models/{s.gemini_model}",
+                           headers={"x-goog-api-key": s.gemini_api_key})
+        line("GEMINI_API_KEY", good, f"{detail} for {s.gemini_model}")
     else:
         print("[--] GEMINI_API_KEY: not set (optional; Groq LLM or the built-in heuristic is used)")
     if s.market_token:

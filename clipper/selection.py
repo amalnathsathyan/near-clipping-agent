@@ -210,7 +210,8 @@ Pick the {n} best candidates. They must not overlap in time. Prefer clips that o
 "and"/"so"/"it" that needs earlier context) and end on a complete thought.
 For each, write:
 - title: a 3-8 word hook title for the clip
-- reason: 1-2 sentences on why this works as a short, describing what actually happens in it
+- reason: 1-2 plain sentences describing what actually happens in the clip and why that works as a short
+  (no hype words like "perfect" or "viral"; only claims the clip's own text supports)
 - quote: one line copied EXACTLY from the candidate text that best shows why
 
 JSON shape:

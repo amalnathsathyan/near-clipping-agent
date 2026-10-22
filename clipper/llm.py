@@ -75,19 +75,34 @@ def _post_with_retry(url: str, **kw) -> requests.Response:
 
 
 def _gemini(system: str, user: str, settings: Settings, max_tokens: int) -> str:
-    body = {
-        "systemInstruction": {"parts": [{"text": system}]},
-        "contents": [{"role": "user", "parts": [{"text": user}]}],
-        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.4,
-                             "maxOutputTokens": max_tokens},
-    }
-    r = _post_with_retry(GEMINI_URL.format(model=settings.gemini_model),
-                         headers={"x-goog-api-key": settings.gemini_api_key}, json=body)
-    if not r.ok:
-        raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
-    data = r.json()
-    parts = data["candidates"][0]["content"]["parts"]
-    return "".join(p.get("text", "") for p in parts if not p.get("thought"))
+    models = [settings.gemini_model] + [m.strip() for m in settings.gemini_fallbacks.split(",") if m.strip()]
+    errors = []
+    for model in dict.fromkeys(models):
+        for thinking in (True, False):
+            config = {"responseMimeType": "application/json", "temperature": 0.4, "maxOutputTokens": max_tokens}
+            if thinking:
+                config["thinkingConfig"] = {"thinkingLevel": "low"}  # picking clips doesn't need long reasoning
+            body = {"systemInstruction": {"parts": [{"text": system}]},
+                    "contents": [{"role": "user", "parts": [{"text": user}]}], "generationConfig": config}
+            try:
+                r = requests.post(GEMINI_URL.format(model=model), headers={"x-goog-api-key": settings.gemini_api_key},
+                                  json=body, timeout=120)
+            except requests.RequestException as e:
+                errors.append(f"{model}: {e}")
+                break
+            if r.status_code == 400 and thinking and "thinking" in r.text.lower():
+                continue  # model without thinking levels: retry plainly
+            if not r.ok:
+                errors.append(f"{model}: HTTP {r.status_code} {r.text[:160]}")
+                break
+            data = r.json()
+            parts = data["candidates"][0]["content"]["parts"]
+            text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
+            if text.strip():
+                return text
+            errors.append(f"{model}: empty answer")
+            break
+    raise RuntimeError("; ".join(errors))
 
 
 def _groq(system: str, user: str, settings: Settings, max_tokens: int) -> str:

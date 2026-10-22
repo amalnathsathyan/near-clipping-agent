@@ -39,7 +39,10 @@ class Settings:
     # Models
     groq_api_key: str = field(default_factory=lambda: _env("GROQ_API_KEY"))
     gemini_api_key: str = field(default_factory=lambda: _env("GEMINI_API_KEY"))
-    gemini_model: str = field(default_factory=lambda: _env("GEMINI_MODEL", "gemini-flash-latest"))
+    gemini_model: str = field(default_factory=lambda: _env("GEMINI_MODEL", "gemini-3.5-flash"))
+    # Tried in order when the main model is overloaded (503), rate limited or retired.
+    gemini_fallbacks: str = field(default_factory=lambda: _env("GEMINI_FALLBACK_MODELS",
+                                                               "gemini-flash-latest,gemini-3.1-flash-lite"))
     groq_llm_model: str = field(default_factory=lambda: _env("GROQ_LLM_MODEL", "openai/gpt-oss-120b"))
     groq_whisper_model: str = field(default_factory=lambda: _env("GROQ_WHISPER_MODEL", "whisper-large-v3-turbo"))
     # "auto" tries Gemini, then Groq, then the built-in heuristic. "gemini", "groq" or "heuristic" pins one.
