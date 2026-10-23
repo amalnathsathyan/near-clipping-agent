@@ -27,7 +27,15 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 echo "== Image registry and build"
 gcloud artifacts repositories describe clipper --location "$REGION" >/dev/null 2>&1 || \
   gcloud artifacts repositories create clipper --repository-format docker --location "$REGION"
-gcloud builds submit --tag "$IMAGE" .
+# Cloud Shell has Docker, so build there and push: this avoids Cloud Build's service-account permissions,
+# which new projects often lack ("PERMISSION_DENIED: The caller does not have permission").
+if command -v docker >/dev/null 2>&1 && [[ "${USE_CLOUD_BUILD:-0}" != 1 ]]; then
+  gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+  docker build -t "$IMAGE" .
+  docker push "$IMAGE"
+else
+  gcloud builds submit --tag "$IMAGE" .
+fi
 
 echo "== Storage bucket for job state and clips"
 gcloud storage buckets describe "gs://$BUCKET" >/dev/null 2>&1 || \
