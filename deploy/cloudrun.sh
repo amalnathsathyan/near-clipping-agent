@@ -60,11 +60,22 @@ put_secret() {  # secret name, env var name, prompt
     read -r -p "$name already stored. Replace it? [y/N] " yn </dev/tty || yn=""
     [[ "$yn" =~ ^[Yy] ]] || return 0
   fi
-  if [[ -z "$value" ]]; then
-    # Read from the terminal, not stdin, so a paste or a pipe can't swallow the answer.
+  local tries=0
+  while [[ -z "$value" && $tries -lt 3 ]]; do
+    tries=$((tries + 1))
+    # Read from the terminal, not stdin, so a paste or a pipe can't swallow the answer. The key is shown
+    # masked by length only, so you can tell the paste arrived.
     read -r -s -p "$prompt: " value </dev/tty || value=""
     echo
-  fi
+    value="${value//[[:space:]]/}"
+    if [[ -n "$value" ]]; then
+      echo "  received ${#value} characters"
+    elif [[ "$var" == GEMINI_API_KEY ]]; then
+      break
+    else
+      echo "  nothing received; paste again (right-click > Paste, or Ctrl+Shift+V), then press Enter"
+    fi
+  done
   if [[ -z "$value" ]]; then
     echo "  $var skipped (nothing entered). Re-run, or pass it as $var=... before the command."
     return 0
