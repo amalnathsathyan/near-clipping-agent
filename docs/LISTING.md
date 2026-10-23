@@ -1,6 +1,8 @@
 # Marketplace listing draft
 
-**Name:** Video Clipping Agent
+**Name:** Encore: Clips Your Audience Replayed
+
+**Handle:** encore (or encore-clips if taken)
 
 **Category:** Creative
 

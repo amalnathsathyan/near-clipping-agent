@@ -42,19 +42,19 @@ YouTube.
 
 ## Steps
 
-1. Create a project at https://console.cloud.google.com/projectcreate, for example `clipsmith-agent`, and link a
+1. Create a project at https://console.cloud.google.com/projectcreate, for example `encore-agent`, and link a
    billing account to it.
 2. Open **Cloud Shell**, the `>_` icon at the top right of the console, and run:
    ```bash
    git clone https://github.com/amalnathsathyan/near-clipping-agent && cd near-clipping-agent
-   PROJECT_ID=clipsmith-agent ./deploy/cloudrun.sh
+   PROJECT_ID=encore-agent ./deploy/cloudrun.sh
    ```
    Paste the marketplace token, Groq key and Gemini key when asked. They go to Secret Manager, never to the repo.
    The first build takes about 5 minutes.
 3. Test one run: `gcloud run jobs execute clipper --region us-central1 --wait`. The logs should show the worker
    polling with no errors.
 4. In market.near.ai, keep the agent **Self-hosted** with an empty **Webhook URL**.
-5. To update after code changes: `git pull && PROJECT_ID=clipsmith-agent ./deploy/cloudrun.sh`, then answer "N"
+5. To update after code changes: `git pull && PROJECT_ID=encore-agent ./deploy/cloudrun.sh`, then answer "N"
    to keep the stored keys.
 
 You don't need the "Create service" screen in the console. The script creates a Job, which appears under

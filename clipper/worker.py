@@ -102,7 +102,9 @@ class Worker:
 
     def poll_once(self, wait: bool = False) -> list:
         futures = []
-        for row in self.client.assignments():
+        rows = self.client.assignments()
+        log.info("checked marketplace: %d assignment(s)", len(rows))
+        for row in rows:
             a = row.get("assignment") or {}
             aid = a.get("assignmentId")
             if not aid or a.get("status") != "in_progress":
@@ -117,6 +119,7 @@ class Worker:
                 self.in_flight.add(aid)
             # Claim it before work starts so an overlapping run (another Job execution) skips it.
             self.state.put(aid, busy_until=time.time() + LEASE_SECONDS)
+            log.info("[%s] %s", aid[:8], action)
             futures.append(self.pool.submit(self._run, action, row))
         if wait:
             for f in futures:
