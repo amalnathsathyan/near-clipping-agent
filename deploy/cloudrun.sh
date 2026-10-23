@@ -29,7 +29,9 @@ gcloud artifacts repositories describe clipper --location "$REGION" >/dev/null 2
   gcloud artifacts repositories create clipper --repository-format docker --location "$REGION"
 # Cloud Shell has Docker, so build there and push: this avoids Cloud Build's service-account permissions,
 # which new projects often lack ("PERMISSION_DENIED: The caller does not have permission").
-if command -v docker >/dev/null 2>&1 && [[ "${USE_CLOUD_BUILD:-0}" != 1 ]]; then
+if [[ "${SKIP_BUILD:-0}" == 1 ]]; then
+  echo "SKIP_BUILD=1: reusing $IMAGE"
+elif command -v docker >/dev/null 2>&1 && [[ "${USE_CLOUD_BUILD:-0}" != 1 ]]; then
   gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
   docker build -t "$IMAGE" .
   docker push "$IMAGE"
@@ -52,23 +54,34 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" --member "serviceAccount:$S
   --role roles/run.invoker --condition None >/dev/null
 
 echo "== Secrets"
-put_secret() {  # name, prompt
-  local name="$1" prompt="$2" value
-  if gcloud secrets describe "$name" >/dev/null 2>&1; then
-    read -r -p "$name already stored. Replace it? [y/N] " yn
+put_secret() {  # secret name, env var name, prompt
+  local name="$1" var="$2" prompt="$3" value="${!2:-}" yn=""
+  if [[ -z "$value" ]] && gcloud secrets describe "$name" >/dev/null 2>&1; then
+    read -r -p "$name already stored. Replace it? [y/N] " yn </dev/tty || yn=""
     [[ "$yn" =~ ^[Yy] ]] || return 0
   fi
-  read -r -s -p "$prompt: " value; echo
-  [[ -n "$value" ]] || { echo "  skipped (empty)"; return 0; }
+  if [[ -z "$value" ]]; then
+    # Read from the terminal, not stdin, so a paste or a pipe can't swallow the answer.
+    read -r -s -p "$prompt: " value </dev/tty || value=""
+    echo
+  fi
+  if [[ -z "$value" ]]; then
+    echo "  $var skipped (nothing entered). Re-run, or pass it as $var=... before the command."
+    return 0
+  fi
   if gcloud secrets describe "$name" >/dev/null 2>&1; then
     printf '%s' "$value" | gcloud secrets versions add "$name" --data-file=- >/dev/null
   else
     printf '%s' "$value" | gcloud secrets create "$name" --replication-policy automatic --data-file=- >/dev/null
   fi
+  echo "  $var stored in Secret Manager as $name"
 }
-put_secret market-agent-token "MARKET_AGENT_TOKEN (aat_...)"
-put_secret groq-api-key "GROQ_API_KEY (gsk_...)"
-put_secret gemini-api-key "GEMINI_API_KEY (AIza..., Enter to skip)"
+put_secret market-agent-token MARKET_AGENT_TOKEN "Paste MARKET_AGENT_TOKEN (aat_...)"
+put_secret groq-api-key GROQ_API_KEY "Paste GROQ_API_KEY (gsk_...)"
+put_secret gemini-api-key GEMINI_API_KEY "Paste GEMINI_API_KEY (AIza..., Enter to skip)"
+for required in market-agent-token groq-api-key; do
+  gcloud secrets describe "$required" >/dev/null 2>&1 || { echo "Missing secret $required; re-run the script to enter it."; exit 1; }
+done
 SECRETS="MARKET_AGENT_TOKEN=market-agent-token:latest,GROQ_API_KEY=groq-api-key:latest"
 gcloud secrets describe gemini-api-key >/dev/null 2>&1 && SECRETS="$SECRETS,GEMINI_API_KEY=gemini-api-key:latest"
 ENV_VARS="WORK_DIR=/data,KEEP_DAYS=10"
