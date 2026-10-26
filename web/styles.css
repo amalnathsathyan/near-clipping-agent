@@ -67,7 +67,8 @@ button, input { font: inherit; color: inherit; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* Nav */
-.nav { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--surface); }
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .nav-row { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 60px; }
 .brand { display: inline-flex; padding: 4px 0; }
 .logo { height: 24px; width: 106px; }
