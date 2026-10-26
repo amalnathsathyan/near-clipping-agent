@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Encore · Clips your audience already replayed</title>
+<meta name="description" content="Encore turns one long video into captioned short clips for Shorts, TikTok and Reels. It cuts from YouTube's Most replayed peaks when they exist, and tells you why it picked every clip.">
+<link rel="canonical" href="https://encoreclip.ai/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Encore">
+<meta property="og:title" content="Encore · Clips your audience already replayed">
+<meta property="og:description" content="Captioned short clips from the moments viewers rewatched, each with the reason it was picked.">
+<meta property="og:url" content="https://encoreclip.ai/">
+<meta property="og:image" content="https://encoreclip.ai/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d0e11" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/Geist-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/Geist-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+<script>
+  // Site settings. Fill these in before launch (see web/README.md).
+  window.ENCORE = {
+    // POST endpoint that accepts JSON {email, source}. Empty = form shows a "not connected" notice.
+    waitlistEndpoint: "",
+    // The live Encore listing on NEAR Agent Market.
+    marketUrl: "https://market.near.ai"
+  };
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Encore","applicationCategory":"MultimediaApplication","operatingSystem":"Web","url":"https://encoreclip.ai/","description":"AI clipping agent that turns long videos into captioned short clips and explains why each clip was chosen."}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="top">
+  <div class="wrap nav-row">
+    <a href="#top" class="brand" aria-label="Encore, back to top"><svg class="logo" viewBox="0 -96 442 100" aria-hidden="true"><g transform="translate(0 -94) scale(0.92)"><rect width="100" height="100" rx="24" style="fill:var(--plate)"/><path d="M20 70 H31 C41 70 43 40 50 40 C57 40 59 70 69 70 H80" style="fill:none;stroke:var(--on-plate);stroke-width:8;stroke-linecap:round;stroke-linejoin:round"/><circle cx="50" cy="24" r="8" style="fill:var(--spotlight)"/></g><path d="M4.1 -26.7Q4.1 -35 7.3 -41.4Q10.5 -47.7 16.4 -51.2Q22.2 -54.6 30 -54.6Q37.6 -54.6 43.4 -51.2Q49.1 -47.8 52.2 -41.4Q55.4 -34.9 55.4 -26V-23.1H17.4Q17.8 -16.2 21.2 -12.6Q24.6 -9 30.4 -9Q34.6 -9 37.5 -10.9Q40.4 -12.9 41.5 -16.4L54.6 -15.6Q52.4 -7.8 46 -3.3Q39.5 1.2 30.3 1.2Q22.4 1.2 16.5 -2.2Q10.5 -5.7 7.3 -12Q4.1 -18.3 4.1 -26.7ZM30 -44.5Q24.8 -44.5 21.5 -41.2Q18.1 -37.9 17.4 -31.7H42.1Q41.7 -38.1 38.5 -41.3Q35.3 -44.5 30 -44.5ZM63 -53.4H74.6L74.9 -44.2Q76.9 -49.5 81.1 -52Q85.3 -54.6 90.9 -54.6Q99.6 -54.6 104.3 -49Q109.1 -43.5 109.1 -34.3V0H96.3V-30.2Q96.3 -37.2 94.2 -40.7Q92 -44.2 87 -44.2Q81.8 -44.2 78.8 -40.5Q75.8 -36.9 75.8 -30.2V0H63ZM116.7 -26.7Q116.7 -35 119.9 -41.4Q123.2 -47.7 129.1 -51.2Q135.1 -54.6 143 -54.6Q153.3 -54.6 160 -49.2Q166.7 -43.9 167.9 -34.5L154.7 -33.8Q154 -38.8 150.8 -41.5Q147.7 -44.2 143 -44.2Q136.8 -44.2 133.4 -39.6Q130 -35 130 -26.7Q130 -18.4 133.4 -13.8Q136.8 -9.2 143 -9.2Q147.8 -9.2 150.9 -12Q154 -14.8 154.7 -20.3L167.9 -19.7Q166.8 -10.1 160.1 -4.5Q153.3 1.2 143 1.2Q135.1 1.2 129.1 -2.2Q123.2 -5.7 119.9 -12Q116.7 -18.3 116.7 -26.7ZM171.7 -26.7Q171.7 -35.1 174.9 -41.4Q178.2 -47.7 184.1 -51.2Q190.1 -54.6 198 -54.6Q205.8 -54.6 211.8 -51.2Q217.7 -47.7 220.9 -41.4Q224.2 -35.1 224.2 -26.7Q224.2 -18.3 220.9 -12Q217.7 -5.7 211.8 -2.2Q205.8 1.2 198 1.2Q190.1 1.2 184.1 -2.2Q178.2 -5.7 174.9 -12Q171.7 -18.3 171.7 -26.7ZM211 -26.7Q211 -35 207.6 -39.6Q204.1 -44.2 198 -44.2Q191.8 -44.2 188.4 -39.6Q185 -35 185 -26.7Q185 -18.4 188.4 -13.8Q191.8 -9.2 198 -9.2Q204.2 -9.2 207.6 -13.8Q211 -18.4 211 -26.7ZM231.8 -53.4H243.8L244.1 -43.1Q245.7 -48.4 248.9 -50.9Q252 -53.4 256.9 -53.4H261.8V-42.4H256.8Q250.6 -42.4 247.6 -39.7Q244.6 -36.9 244.6 -30.8V0H231.8ZM266.6 -26.7Q266.6 -35 269.8 -41.4Q273 -47.7 278.9 -51.2Q284.7 -54.6 292.5 -54.6Q300.1 -54.6 305.9 -51.2Q311.6 -47.8 314.8 -41.4Q317.9 -34.9 317.9 -26V-23.1H279.9Q280.3 -16.2 283.7 -12.6Q287.1 -9 292.9 -9Q297.1 -9 300 -10.9Q302.9 -12.9 304 -16.4L317.1 -15.6Q314.9 -7.8 308.4 -3.3Q302 1.2 292.8 1.2Q284.9 1.2 278.9 -2.2Q273 -5.7 269.8 -12Q266.6 -18.3 266.6 -26.7ZM292.5 -44.5Q287.3 -44.5 284 -41.2Q280.6 -37.9 279.9 -31.7H304.6Q304.2 -38.1 301 -41.3Q297.8 -44.5 292.5 -44.5Z" transform="translate(118 0)" style="fill:var(--ink)"/></svg></a>
+    <nav aria-label="Main">
+      <ul class="nav-links">
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#why">Why Encore</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="#start">Get early access</a>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- HERO -->
+<section class="hero wrap" aria-labelledby="hero-title">
+  <div class="hero-top">
+  <div class="hero-copy">
+    <p class="label">AI clipping agent for podcasts and long-form video</p>
+    <h1 id="hero-title">Clips your audience already replayed.</h1>
+    <p class="lede">Send one long video. Encore finds its strongest moments, cuts them on clean sentence breaks, captions them for phones, and tells you <em>why</em> it picked each one.</p>
+    <form class="signup" data-signup data-source="hero" novalidate>
+      <label class="sr-only" for="email-hero">Email address</label>
+      <div class="signup-row">
+        <input id="email-hero" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@yourshow.com" required aria-describedby="email-hero-msg">
+        <button class="btn btn-primary" type="submit"><span class="btn-text">Get early access</span></button>
+      </div>
+      <p class="signup-msg" id="email-hero-msg" role="status" aria-live="polite"></p>
+    </form>
+    <p class="hero-alt">Need clips today? <a class="link" data-market href="https://market.near.ai">Hire Encore on NEAR Agent Market</a>, paid per video.</p>
+  </div>
+  <div class="hero-brief" aria-label="Example of how a job starts">
+    <p class="label">How a job starts</p>
+    <span class="hb-who r">You</span>
+    <p class="hb hb-you">Here's episode 112. Five clips for Shorts and Instagram, please.</p>
+    <span class="hb-who">Encore</span>
+    <p class="hb hb-enc">On it. I'll make <b>5 clips, 20–60 s each, in 9:16 and 4:5, with captions.</b> I'll use YouTube's "Most replayed" data if the video has it, otherwise transcript analysis, and every clip comes with the reason it was picked.</p>
+  </div>
+  </div>
+
+  <!-- PRODUCT DEMO -->
+  <figure class="demo" id="demo" aria-label="Interactive example of an Encore job">
+    <div class="demo-bar">
+      <div class="demo-src">
+        <span class="src-icon" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M6 5l5 3-5 3z" fill="currentColor"/></svg></span>
+        <span class="src-title">Sample episode, 58:12</span>
+        <span class="src-url mono">youtube.com/watch?v=…</span>
+      </div>
+      <div class="demo-status mono" data-status aria-live="polite">Ready</div>
+    </div>
+
+    <div class="graph-wrap">
+      <div class="graph-head">
+        <span class="label">Most replayed</span>
+        <span class="graph-legend"><i class="lg-dot" aria-hidden="true"></i>Replay peak inside a clip</span>
+      </div>
+      <div class="graph-box" data-graphbox>
+        <svg class="graph" data-graph viewBox="0 0 1000 132" preserveAspectRatio="none" role="img" aria-label="Replay graph across the 58 minute episode, with five clip windows. Three sit on replay peaks."></svg>
+      </div>
+      <div class="graph-axis mono" aria-hidden="true"><span>00:00</span><span>15:00</span><span>30:00</span><span>45:00</span><span>58:12</span></div>
+    </div>
+
+    <div class="clip-tabs" role="tablist" aria-label="Clips" data-tabs></div>
+
+    <div class="demo-body">
+      <div class="stage">
+        <div class="frame-area">
+          <div class="frame" data-frame data-fmt="9:16">
+            <svg class="speaker" viewBox="0 0 160 160" aria-hidden="true"><circle cx="80" cy="62" r="26"/><path d="M28 160c0-34 23-56 52-56s52 22 52 56z"/></svg>
+            <div class="caption" data-caption aria-hidden="true"></div>
+            <div class="safe" aria-hidden="true"><span class="safe-side"></span><span class="safe-bottom"></span></div>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="seg" role="radiogroup" aria-label="Format" data-formats>
+            <button type="button" role="radio" aria-checked="true" data-fmt="9:16">9:16</button>
+            <button type="button" role="radio" aria-checked="false" data-fmt="1:1">1:1</button>
+            <button type="button" role="radio" aria-checked="false" data-fmt="4:5">4:5</button>
+            <button type="button" role="radio" aria-checked="false" data-fmt="16:9">16:9</button>
+          </div>
+          <label class="check"><input type="checkbox" data-captions checked> Captions</label>
+          <label class="check"><input type="checkbox" data-safe> Platform buttons</label>
+        </div>
+      </div>
+
+      <div class="why" data-why aria-live="polite">
+        <!-- filled by app.js -->
+      </div>
+    </div>
+
+    <div class="revise">
+      <p class="label" id="revise-label">Ask for a change</p>
+      <div class="revise-row" role="group" aria-labelledby="revise-label">
+        <button type="button" class="chip" data-rev="c2-earlier">C2: start earlier</button>
+        <button type="button" class="chip" data-rev="c4-replace">C4: replace with a different moment</button>
+        <button type="button" class="chip" data-rev="c3-captions">C3: bigger captions</button>
+        <button type="button" class="chip chip-quiet" data-rev="reset" hidden>Reset example</button>
+      </div>
+      <p class="revise-log" data-log aria-live="polite"></p>
+    </div>
+    <figcaption class="demo-note">Interactive example. The episode, clips and quotes are illustrative; the layout, fields and change requests mirror what Encore delivers.</figcaption>
+  </figure>
+</section>
+
+<!-- DIFFERENTIATOR: REASONS -->
+<section class="block wrap" id="why" aria-labelledby="why-title">
+  <div class="block-head">
+    <p class="label">Why Encore</p>
+    <h2 id="why-title">A score tells you nothing. A reason you can check.</h2>
+    <p class="lede">Clipping tools usually hand you a number. Encore shows its working for every clip: where it came from, why the moment works, the line that carries it, and which signal it used. You can disagree with a reason. You can't argue with a 9.4.</p>
+  </div>
+
+  <div class="compare">
+    <div class="compare-card compare-score" aria-label="A typical clip score">
+      <p class="label">A typical clip score</p>
+      <p class="score-num">9.4<span>/10</span></p>
+      <p class="muted">Is it the hook? The topic? The face on screen? You'll find out after you post.</p>
+    </div>
+    <div class="compare-card compare-report">
+      <p class="label">An Encore report entry</p>
+      <div class="report mono">
+        <p class="rh">## C1: The month we almost shut down</p>
+        <p><b>Source time:</b> 18:42 to 19:28 (46.0 s)</p>
+        <p><b>Why this moment:</b> Opens on a direct question, tells a complete story with a turn at the end.</p>
+        <p><b>Key line:</b> "We had eleven days of runway and nobody on the team knew."</p>
+        <p><b>Signal:</b> YouTube Most replayed: peaks at 19:05 inside this clip (2.4x the video's typical replay level)</p>
+      </div>
+      <p class="example-tag">Illustrative entry, real report format</p>
+    </div>
+  </div>
+
+  <div class="pillars">
+    <article class="pillar">
+      <div class="pillar-visual" aria-hidden="true">
+        <svg viewBox="0 0 280 96" class="mini-graph"><path class="mg-line" d="M0 80 C30 78 40 70 60 72 S90 76 104 60 S118 18 132 16 S150 50 170 66 S210 74 230 70 S262 62 280 66"/><rect class="mg-win" x="112" y="6" width="44" height="86" rx="4"/><circle class="mg-dot" cx="132" cy="16" r="5"/></svg>
+      </div>
+      <h3>Picked by your viewers, not a guess</h3>
+      <p>Many YouTube videos carry a public "Most replayed" graph. Encore reads it and cuts from the peaks. If a video has no replay data, it says so and works from the full transcript instead, looking for a hook, a complete thought with a payoff, and quotable lines.</p>
+    </article>
+    <article class="pillar">
+      <div class="pillar-visual" aria-hidden="true">
+        <svg viewBox="0 0 280 96" class="mini-words">
+          <g class="mw-words"><rect x="6" y="38" width="44" height="20" rx="4"/><rect x="56" y="38" width="30" height="20" rx="4"/><rect x="92" y="38" width="52" height="20" rx="4"/><rect x="176" y="38" width="36" height="20" rx="4"/><rect x="218" y="38" width="56" height="20" rx="4"/></g>
+          <line class="mw-cut" x1="160" y1="14" x2="160" y2="82"/><text x="160" y="10" class="mw-t">cut</text><text x="160" y="94" class="mw-t">pause</text>
+        </svg>
+      </div>
+      <h3>Cuts that never land mid-word</h3>
+      <p>Every clip starts and ends on a sentence boundary, inside the pause between words. An automated check rejects any cut that falls inside a word before the clip reaches you.</p>
+    </article>
+    <article class="pillar">
+      <div class="pillar-visual pv-chat" aria-hidden="true">
+        <p class="bubble bubble-you">C2: start earlier</p>
+        <p class="bubble bubble-enc">Re-made C2. C1, C3, C4 and C5 are unchanged.</p>
+      </div>
+      <h3>Change one clip, keep the rest</h3>
+      <p>Clips have stable IDs. Reply "C2: start earlier", "replace C4" or "C1: end at 14:05" and Encore re-makes only the clips you named. Everything you already approved stays exactly as delivered.</p>
+    </article>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="block wrap" id="how" aria-labelledby="how-title">
+  <div class="block-head">
+    <p class="label">How it works</p>
+    <h2 id="how-title">Brief it like an editor. Get files back like one.</h2>
+  </div>
+  <ol class="steps">
+    <li>
+      <span class="step-n mono">01</span>
+      <h3>Send the video</h3>
+      <p>A YouTube or other public link, or upload the file. Sources up to 3 hours. Say how many clips, which formats, how long, and which topics to focus on, or leave it to the defaults.</p>
+    </li>
+    <li>
+      <span class="step-n mono">02</span>
+      <h3>Encore confirms the brief</h3>
+      <p>Before it starts, it replies with exactly what it will make and lists any defaults it filled in: 5 clips, 9:16, 20 to 60 seconds each, captions on.</p>
+    </li>
+    <li>
+      <span class="step-n mono">03</span>
+      <h3>It finds and cuts the moments</h3>
+      <p>Replay peaks or the full transcript, sentence-safe cuts, framing that keeps the speaker in shot, captions from word timings. About 10 to 30 minutes for an hour-long video.</p>
+    </li>
+    <li>
+      <span class="step-n mono">04</span>
+      <h3>Review, then revise by clip ID</h3>
+      <p>You get one MP4 per clip per format and a report with every clip's reason. Ask for changes by ID and only those clips are re-made.</p>
+    </li>
+  </ol>
+</section>
+
+<!-- OUTPUT -->
+<section class="block wrap" id="output" aria-labelledby="output-title">
+  <div class="block-head">
+    <p class="label">What comes back</p>
+    <h2 id="output-title">Ready to post on every platform you use.</h2>
+  </div>
+
+  <div class="formats" aria-hidden="true">
+    <div class="fmt" style="--ar:9/16"><span>9:16</span><small>Shorts, TikTok, Reels</small></div>
+    <div class="fmt" style="--ar:4/5"><span>4:5</span><small>Instagram, LinkedIn feed</small></div>
+    <div class="fmt" style="--ar:1/1"><span>1:1</span><small>Feeds, X</small></div>
+    <div class="fmt" style="--ar:16/9"><span>16:9</span><small>YouTube, web</small></div>
+  </div>
+
+  <dl class="specs">
+    <div><dt>Four formats from one run</dt><dd>9:16, 1:1, 4:5 and 16:9. A face-aware crop keeps the speaker in frame. When two speakers are too far apart to crop, the whole frame sits over a blurred background instead.</dd></div>
+    <div><dt>Captions built for phones</dt><dd>Burned in from word-level timings, 2 to 4 words per line, with the spoken word highlighted. They sit above the area TikTok, Reels and Shorts cover with their own buttons. Or turn them off.</dd></div>
+    <div><dt>The number and length you want</dt><dd>5 clips by default, up to 20 per video. Each runs 20 to 60 seconds unless you ask for a different range.</dd></div>
+    <div><dt>Audio-only episodes too</dt><dd>Send an audio podcast and get a waveform video with captions.</dd></div>
+    <div><dt>A report you can forward</dt><dd>Source timestamps, reason, key line and signal for every clip. Useful when the person approving the clips isn't the person who cut them.</dd></div>
+    <div><dt>Straight answers</dt><dd>If a link is blocked or a format can't be made, the report says so and why. Nothing quietly goes missing.</dd></div>
+  </dl>
+
+  <div class="wont">
+    <p class="label">What it won't do</p>
+    <ul>
+      <li>Clip videos you don't own or have rights to</li>
+      <li>Clip music-only videos with no speech</li>
+      <li>Add B-roll or stock footage</li>
+      <li>Post to your social accounts</li>
+    </ul>
+  </div>
+</section>
+
+<!-- WHO -->
+<section class="block wrap" id="who" aria-labelledby="who-title">
+  <div class="block-head">
+    <p class="label">Who it's for</p>
+    <h2 id="who-title">Built for people who talk for a living.</h2>
+  </div>
+  <div class="cases">
+    <article class="case">
+      <h3>Podcasts and interview shows</h3>
+      <p>An hour of conversation, five moments worth posting. Encore finds the stories that land and cuts them where the sentence ends, not where a timer ran out.</p>
+    </article>
+    <article class="case">
+      <h3>YouTube long-form creators</h3>
+      <p>Your viewers already told YouTube which parts they rewatched. Turn those peaks into Shorts that point back to the full video.</p>
+    </article>
+    <article class="case">
+      <h3>Editors and agencies</h3>
+      <p>Hand clients the clips and the reasons behind them. Revisions by clip ID mean one note changes one clip, not the whole batch.</p>
+    </article>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="block wrap" id="pricing" aria-labelledby="pricing-title">
+  <div class="block-head">
+    <p class="label">Pricing</p>
+    <h2 id="pricing-title">Priced by hours of video, not credits.</h2>
+    <p class="notice" role="note"><strong>Proposal.</strong> Subscription plans aren't on sale yet and the prices shown are placeholders. Pay-per-video on NEAR Agent Market is the way to use Encore today.</p>
+  </div>
+
+  <div class="plans">
+    <article class="plan plan-now">
+      <div class="plan-top">
+        <h3>Per video</h3>
+        <span class="pill pill-live">Available now</span>
+      </div>
+      <p class="price"><span class="amt">5</span> <span class="per">USDC per video</span></p>
+      <p class="plan-for">Hire the agent on NEAR Agent Market. No subscription.</p>
+      <ul class="feat">
+        <li>One video, up to 3 hours</li>
+        <li>All the clips you ask for, in every format you ask for</li>
+        <li>Report with a reason for every clip</li>
+        <li>Change rounds on named clips</li>
+      </ul>
+      <a class="btn btn-secondary" data-market href="https://market.near.ai">Hire on NEAR Agent Market</a>
+    </article>
+
+    <article class="plan plan-featured">
+      <div class="plan-top">
+        <h3>Creator</h3>
+        <span class="pill">Placeholder</span>
+      </div>
+      <p class="price"><span class="amt">$—</span> <span class="per">per month</span></p>
+      <p class="plan-for">For a weekly show.</p>
+      <ul class="feat">
+        <li><b>[X] hours</b> of source video a month</li>
+        <li>All formats, captions and reports</li>
+        <li>Revisions on named clips don't use hours</li>
+        <li>Cancel any time</li>
+      </ul>
+      <a class="btn btn-primary" href="#start">Join the waitlist</a>
+    </article>
+
+    <article class="plan">
+      <div class="plan-top">
+        <h3>Studio</h3>
+        <span class="pill">Placeholder</span>
+      </div>
+      <p class="price"><span class="amt">$—</span> <span class="per">per month</span></p>
+      <p class="plan-for">For daily uploads or several shows.</p>
+      <ul class="feat">
+        <li><b>[Y] hours</b> of source video a month</li>
+        <li>Everything in Creator</li>
+        <li>Topic focus saved per show <span class="tag-planned">Planned</span></li>
+        <li>Seats for an editor or client <span class="tag-planned">Planned</span></li>
+      </ul>
+      <a class="btn btn-secondary" href="#start">Join the waitlist</a>
+    </article>
+  </div>
+  <p class="fine">Agencies and networks with higher volume: <a class="link" href="#start">join the waitlist</a> and mention it. Subscription hours, prices and planned features will be confirmed before launch.</p>
+</section>
+
+<!-- FAQ -->
+<section class="block wrap" id="faq" aria-labelledby="faq-title">
+  <div class="block-head">
+    <p class="label">FAQ</p>
+    <h2 id="faq-title">Questions, answered plainly.</h2>
+  </div>
+  <div class="faq">
+    <details>
+      <summary>What can I send?</summary>
+      <p>A YouTube link, another public video link, or an uploaded file, up to 3 hours long. Encore needs speech to work with, so music-only videos aren't supported. Audio-only podcasts are fine.</p>
+    </details>
+    <details>
+      <summary>What is "Most replayed" data, and what if my video doesn't have it?</summary>
+      <p>YouTube publishes a replay graph on many videos showing which parts viewers rewatched most. Encore uses it when it's there. When it isn't, or the graph is flat, Encore chooses from the full timestamped transcript. Every clip's report says which signal it used.</p>
+    </details>
+    <details>
+      <summary>What if my link can't be downloaded?</summary>
+      <p>YouTube sometimes blocks downloads from servers. If that happens Encore tells you plainly, and you can upload the file instead.</p>
+    </details>
+    <details>
+      <summary>How long does a job take?</summary>
+      <p>About 10 to 30 minutes for a video up to an hour. Longer sources take longer.</p>
+    </details>
+    <details>
+      <summary>Can I change a clip I don't like?</summary>
+      <p>Yes. Reply with the clip ID and what to change: "C2: start earlier", "C4: replace with a different moment", "C1: end at 14:05", "bigger captions on C3". Only the clips you name are re-made.</p>
+    </details>
+    <details>
+      <summary>What gets sent to AI models?</summary>
+      <p>Speech-to-text receives the audio, and the model that picks moments receives the transcript text. Cutting, framing and captioning run in Encore's own video pipeline.</p>
+    </details>
+    <details>
+      <summary>Do I need the rights to the video?</summary>
+      <p>Yes. Encore only clips videos you own or have permission to use, and asks you to confirm that with each job.</p>
+    </details>
+    <details>
+      <summary>How much does it cost?</summary>
+      <p>Today Encore is hired per video on NEAR Agent Market. Monthly plans priced by hours of video are planned; the prices on this page are placeholders until they launch.</p>
+    </details>
+    <details>
+      <summary>Does Encore post the clips for me?</summary>
+      <p>No. You get the files and the report, and you decide what goes out.</p>
+    </details>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="closing wrap" id="start" aria-labelledby="start-title">
+  <div class="closing-inner">
+    <svg class="closing-mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M20 70 H31 C41 70 43 40 50 40 C57 40 59 70 69 70 H80"/><circle cx="50" cy="24" r="8"/></svg>
+    <h2 id="start-title">Your audience already picked the moments.</h2>
+    <p class="lede">Get early access to Encore's web app, or hire the agent on NEAR Agent Market today.</p>
+    <form class="signup" data-signup data-source="closing" novalidate>
+      <label class="sr-only" for="email-closing">Email address</label>
+      <div class="signup-row">
+        <input id="email-closing" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@yourshow.com" required aria-describedby="email-closing-msg">
+        <button class="btn btn-primary" type="submit"><span class="btn-text">Get early access</span></button>
+      </div>
+      <p class="signup-msg" id="email-closing-msg" role="status" aria-live="polite"></p>
+    </form>
+    <p class="hero-alt"><a class="link" data-market href="https://market.near.ai">Hire Encore on NEAR Agent Market</a></p>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-row">
+    <a href="#top" class="brand" aria-label="Encore, back to top"><svg class="logo logo-sm" viewBox="0 -96 442 100" aria-hidden="true"><g transform="translate(0 -94) scale(0.92)"><rect width="100" height="100" rx="24" style="fill:var(--plate)"/><path d="M20 70 H31 C41 70 43 40 50 40 C57 40 59 70 69 70 H80" style="fill:none;stroke:var(--on-plate);stroke-width:8;stroke-linecap:round;stroke-linejoin:round"/><circle cx="50" cy="24" r="8" style="fill:var(--spotlight)"/></g><path d="M4.1 -26.7Q4.1 -35 7.3 -41.4Q10.5 -47.7 16.4 -51.2Q22.2 -54.6 30 -54.6Q37.6 -54.6 43.4 -51.2Q49.1 -47.8 52.2 -41.4Q55.4 -34.9 55.4 -26V-23.1H17.4Q17.8 -16.2 21.2 -12.6Q24.6 -9 30.4 -9Q34.6 -9 37.5 -10.9Q40.4 -12.9 41.5 -16.4L54.6 -15.6Q52.4 -7.8 46 -3.3Q39.5 1.2 30.3 1.2Q22.4 1.2 16.5 -2.2Q10.5 -5.7 7.3 -12Q4.1 -18.3 4.1 -26.7ZM30 -44.5Q24.8 -44.5 21.5 -41.2Q18.1 -37.9 17.4 -31.7H42.1Q41.7 -38.1 38.5 -41.3Q35.3 -44.5 30 -44.5ZM63 -53.4H74.6L74.9 -44.2Q76.9 -49.5 81.1 -52Q85.3 -54.6 90.9 -54.6Q99.6 -54.6 104.3 -49Q109.1 -43.5 109.1 -34.3V0H96.3V-30.2Q96.3 -37.2 94.2 -40.7Q92 -44.2 87 -44.2Q81.8 -44.2 78.8 -40.5Q75.8 -36.9 75.8 -30.2V0H63ZM116.7 -26.7Q116.7 -35 119.9 -41.4Q123.2 -47.7 129.1 -51.2Q135.1 -54.6 143 -54.6Q153.3 -54.6 160 -49.2Q166.7 -43.9 167.9 -34.5L154.7 -33.8Q154 -38.8 150.8 -41.5Q147.7 -44.2 143 -44.2Q136.8 -44.2 133.4 -39.6Q130 -35 130 -26.7Q130 -18.4 133.4 -13.8Q136.8 -9.2 143 -9.2Q147.8 -9.2 150.9 -12Q154 -14.8 154.7 -20.3L167.9 -19.7Q166.8 -10.1 160.1 -4.5Q153.3 1.2 143 1.2Q135.1 1.2 129.1 -2.2Q123.2 -5.7 119.9 -12Q116.7 -18.3 116.7 -26.7ZM171.7 -26.7Q171.7 -35.1 174.9 -41.4Q178.2 -47.7 184.1 -51.2Q190.1 -54.6 198 -54.6Q205.8 -54.6 211.8 -51.2Q217.7 -47.7 220.9 -41.4Q224.2 -35.1 224.2 -26.7Q224.2 -18.3 220.9 -12Q217.7 -5.7 211.8 -2.2Q205.8 1.2 198 1.2Q190.1 1.2 184.1 -2.2Q178.2 -5.7 174.9 -12Q171.7 -18.3 171.7 -26.7ZM211 -26.7Q211 -35 207.6 -39.6Q204.1 -44.2 198 -44.2Q191.8 -44.2 188.4 -39.6Q185 -35 185 -26.7Q185 -18.4 188.4 -13.8Q191.8 -9.2 198 -9.2Q204.2 -9.2 207.6 -13.8Q211 -18.4 211 -26.7ZM231.8 -53.4H243.8L244.1 -43.1Q245.7 -48.4 248.9 -50.9Q252 -53.4 256.9 -53.4H261.8V-42.4H256.8Q250.6 -42.4 247.6 -39.7Q244.6 -36.9 244.6 -30.8V0H231.8ZM266.6 -26.7Q266.6 -35 269.8 -41.4Q273 -47.7 278.9 -51.2Q284.7 -54.6 292.5 -54.6Q300.1 -54.6 305.9 -51.2Q311.6 -47.8 314.8 -41.4Q317.9 -34.9 317.9 -26V-23.1H279.9Q280.3 -16.2 283.7 -12.6Q287.1 -9 292.9 -9Q297.1 -9 300 -10.9Q302.9 -12.9 304 -16.4L317.1 -15.6Q314.9 -7.8 308.4 -3.3Q302 1.2 292.8 1.2Q284.9 1.2 278.9 -2.2Q273 -5.7 269.8 -12Q266.6 -18.3 266.6 -26.7ZM292.5 -44.5Q287.3 -44.5 284 -41.2Q280.6 -37.9 279.9 -31.7H304.6Q304.2 -38.1 301 -41.3Q297.8 -44.5 292.5 -44.5Z" transform="translate(118 0)" style="fill:var(--ink)"/></svg></a>
+    <nav aria-label="Footer">
+      <ul class="foot-links">
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a data-market href="https://market.near.ai">NEAR Agent Market</a></li>
+      </ul>
+    </nav>
+    <p class="muted">© 2026 Encore · encoreclip.ai</p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
